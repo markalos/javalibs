@@ -10,12 +10,17 @@ class DaemonThread implements Runnable {
 		mThread = new Thread(this);
 		this.action = action;
 		isAlive = true;
-		mThread.start();
 	}
 
-	synchronized public void restart() {
-		pauseThread = false;
-		notify();
+	synchronized public void start() {
+		if (mThread.getState() == Thread.State.NEW) {
+			mThread.start();
+			System.out.println("start the Thread " + mThread);
+		} else {
+			System.out.println(mThread + " has been started");
+			pauseThread = false;
+			notify();
+		}
 	}
 
 	synchronized public void pause() {
@@ -37,11 +42,11 @@ class DaemonThread implements Runnable {
 	public void run() {
 		try {
 			while (isAlive) {
-				
 				if (pauseThread) {
 					synchronized (this) {
 						while (pauseThread && isAlive) {
 							wait();
+							System.out.println("wait");
 						}
 					}
 				} else {
@@ -61,11 +66,9 @@ class DaemonThread implements Runnable {
 				
 			}
 		});
-		for (int i = 0; i < 3; ++i) {
-			
-		}
-		mThread.restart();
-		mThread.pause();
+
+		mThread.start();
+		mThread.start();
 		mThread.finish();
 		System.out.println("end test");
 	}
