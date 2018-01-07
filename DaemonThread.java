@@ -1,7 +1,7 @@
 
 
 class DaemonThread implements Runnable {
-	private volatile boolean isAlive;
+	private volatile boolean keepRuning;
 	private volatile boolean pauseThread;
 	private Thread mThread;
 	private Action action;
@@ -9,7 +9,7 @@ class DaemonThread implements Runnable {
 	DaemonThread(Action action) {
 		mThread = new Thread(this);
 		this.action = action;
-		isAlive = true;
+		keepRuning = true;
 	}
 
 	synchronized public void start() {
@@ -29,7 +29,7 @@ class DaemonThread implements Runnable {
 	}
 
 	synchronized public void finish() {
-		isAlive = false;
+		keepRuning = false;
 		pauseThread = true;
 		notify();
 	}
@@ -41,10 +41,10 @@ class DaemonThread implements Runnable {
 	@Override
 	public void run() {
 		try {
-			while (isAlive) {
+			while (keepRuning) {
 				if (pauseThread) {
 					synchronized (this) {
-						while (pauseThread && isAlive) {
+						while (pauseThread && keepRuning) {
 							wait();
 							System.out.println("wait");
 						}
